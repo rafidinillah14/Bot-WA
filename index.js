@@ -1,7 +1,21 @@
 import makeWASocket, { useMultiFileAuthState, downloadContentFromMessage, DisconnectReason } from '@whiskeysockets/baileys';
 import pino from 'pino';
 import qrcode from 'qrcode-terminal';
+import express from 'express'; // <-- Ditambahkan untuk membuka port HTTP Render
 
+// ===== SETUP SERVER HTTP (AGAR RENDER TIDAK ERROR / PORT TERBUKA) =====
+const app = express();
+const port = process.env.PORT || 10000;
+
+app.get('/', (req, res) => {
+    res.send('Bot WhatsApp is running and active!');
+});
+
+app.listen(port, '0.0.0.0', () => {
+    console.log(`🌐 HTTP Server is listening on port ${port}`);
+});
+
+// ===== LOGIKA UTAMA BOT WHATSAPP =====
 async function startBot() {
     // 1. Setup Sesi (Otomatis simpan di folder 'auth_info')
     const { state, saveCreds } = await useMultiFileAuthState('auth_info');
@@ -30,8 +44,9 @@ async function startBot() {
             console.log('[Start Up Bot Status]');
             console.log('✅ Bot sudah terhubung!');
             console.log('ID Bot:', sock.user.id);
-            console.log('LID Bot:', sock.user.lid);
-            const botLidClean = sock.user.lid.split(':')[0];
+            if (sock.user.lid) {
+                console.log('LID Bot:', sock.user.lid);
+            }
         }
     });
     
@@ -55,12 +70,11 @@ async function startBot() {
         if (!targets) return;
 
         console.log(`[${new Date().toLocaleString()}]`);
-        console.log('Raw Message:',msg);
+        console.log('Raw Message:', msg);
 
         // ===== LOGIKA DETEKSI =====
         const messageText = msg.message?.extendedTextMessage?.text || msg.message?.imageMessage?.caption || "";
         const botLidClean = sock.user.lid ? sock.user.lid.split(':')[0] : "";
-
 
         // Cek tag berdasarkan LID yang muncul di teks atau metadata
         const isTagged = messageText.includes(`@${botLidClean}`);
