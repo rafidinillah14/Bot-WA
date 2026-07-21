@@ -1,4 +1,5 @@
-import makeWASocket, { useMultiFileAuthState, downloadContentFromMessage, DisconnectReason } from '@whiskeysockets/baileys';
+import pkg from '@whiskeysockets/baileys';
+const { makeWASocket, useMultiFileAuthState, downloadContentFromMessage, DisconnectReason } = pkg;
 import pino from 'pino';
 import qrcode from 'qrcode-terminal';
 import express from 'express'; // <-- Ditambahkan untuk membuka port HTTP Render
